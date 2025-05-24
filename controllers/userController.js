@@ -3,36 +3,54 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 
-const registerUser = async (req,res) =>{
-    const {name,email,password} = req.body
-    try {
-        // const existingUser = findOne({email})
-        // console.log(existingUser)
-        // if(existingUser){
-        //     res.status(200).send({message:'User already exist'})
-        // }
-        const newUser = await User.create({name,email,password})
-        res.status(200).send({message:'User registered successfully',success:true})
-    } catch (error) {
-        res.status(500).send({error:error})
+const registerUser = async (req, res) => {
+  const { name, email, password } = req.body;
+  try {
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      return res.status(400).send({ message: 'User already exists', success: false });
     }
-}
 
-const LoginUser = async(req,res)=>{
-    const {email,password} = req.body
-    try {
-         const loggedInUser = await User.findOne({where:{email:req.body.email,password:req.body.password},attributes: ['id', 'isAdmin']})
+    const newUser = await User.create({ name, email, password });
+    res.status(201).send({ message: 'User registered successfully', success: true });
+  } catch (error) {
+    res.status(500).send({ message: "Registration failed", error });
+  }
+};
 
-        // console.log(loggedInUser, "Login user") ;
-        const user = loggedInUser.dataValues
-        console.log(user,"User data****")
-        const token = jwt.sign(user,process.env.SECREATE_KEY,{expiresIn:'2h'})
-        console.log(token,"Token")
-        res.status(200).send({message:"User Loggin successfully", success:true,token:token})
-    } catch (error) {
-        res.status(500).send({error:error})
+
+const LoginUser = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const loggedInUser = await User.findOne({ where: { email } });
+
+    if (!loggedInUser) {
+      return res.status(401).send({ message: "User not found", success: false });
     }
-}
+
+    // Simple password match (ideally, hash passwords!)
+    if (loggedInUser.password !== password) {
+      return res.status(401).send({ message: "Incorrect password", success: false });
+    }
+
+    const userPayload = {
+      id: loggedInUser.id,
+      isAdmin: loggedInUser.isAdmin,
+    };
+
+    const token = jwt.sign(userPayload, process.env.SECREATE_KEY, { expiresIn: '2h' });
+
+    res.status(200).send({
+      message: "User logged in successfully",
+      success: true,
+      token,
+    });
+  } catch (error) {
+    res.status(500).send({ message: "Login failed", error });
+  }
+};
+
 
 const getUserInfo = async (req, res) => {
     console.log('req.user',req.user)
