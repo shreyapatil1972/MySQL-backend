@@ -11,6 +11,11 @@ const Brand = sequelize.define('Brand', {
         type: DataTypes.STRING(30),
         allowNull: false,
         unique: true
+    },
+    image:{
+        type:DataTypes.STRING(30),
+        allowNull:false,
+        unique:true
     }
 }, {
     tableName: 'Brands',

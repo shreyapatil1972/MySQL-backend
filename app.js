@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path')
 require('dotenv').config();
 require('./config/db');
 
@@ -21,7 +22,7 @@ app.use('/api/brand', brandRoute);
 app.use('/api/product',productRoute)
 app.use('/api/category',categoryRoute)
 app.use('/api/user', userRoute)
-
+app.use('/uploads',express.static(path.join(__dirname,'uploads')))
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
 

@@ -5,12 +5,20 @@ const {Brand} = require('../models/brandModel');
     console.log(req.body)
     console.log(req.user.isAdmin)
     const { name } = req.body;
+    const image = req.file ? req.file.filename : null
     try {
         if(!req.user.isAdmin){
             res.status(401).send({message:'not Authorized'})
-        }
-        const newBrand = await Brand.create({name});
-        res.status(200).send({ message: 'Brand created successfully', brand: newBrand, success: true });
+        }else{
+
+        const existingBrand = await Brand.findOne({name})
+        console.log(existingBrand, "existingBrand")
+        if(existingBrand){
+            res.status(201).send({message:"Brand Already exist"})
+        }else{
+    const newBrand = await Brand.create({name,image})
+    res.status(200).send({message:'Brand created successfully',success:true})
+    }}
     } catch (error) {
         res.status(500).send({ error: error.message });
     }
@@ -20,7 +28,12 @@ const {Brand} = require('../models/brandModel');
  const getAllBrands = async (req, res) => {
     try {
         const brands = await Brand.findAll();
-        res.status(200).send({ brands:brands, success: true });
+        const modifiedBrands = brands.map((brand)=>({
+            id:brand.id,
+            name:brand.name,
+            image:`http://localhost:7000/uploads/${brand.image}`
+        }))
+        res.status(200).send({ brands:modifiedBrands, success: true });
     } catch (error) {
         res.status(500).send({ error: error.message });
     }
@@ -34,7 +47,7 @@ const {Brand} = require('../models/brandModel');
         if (!brand) return res.status(404).send({ message: 'Brand not found', success: false });
         res.status(200).send({ brand, success: true });
     } catch (error) {
-        res.status(500).send({ error: error.message });
+        res.status(500).send({message: "Internal server error", error: error.message });
     }
 };
 

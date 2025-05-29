@@ -1,14 +1,20 @@
 const {Category} = require('../models/categoryModel')
 
 createCategory = async (req,res) => {
-    const {name} = req.body
+    const {name} = req.body;
+    const image = req.file ? req.file.filename : null;
     try {
         if(!req.user.isAdmin){
             res.status(401).send({message:'not Authorized'})
         }
+        const existingCategory = await Category.findOne({ where: { name } });
+        if (existingCategory) {
+            return res.status(400).send({ message: "Category already exists", success: false });
+        }
         const newCategory = await Category.create({name})
         res.status(200).send({message:'category created successfully ',success:true})
     } catch (error) {
+        console.error("Error creating category:", error);
         res.status(500).send({error:error})
     }
 }
@@ -16,7 +22,12 @@ createCategory = async (req,res) => {
 getAllCategories= async (req,res) => {
     try {
         const categories = await Category.findAll()
-        res.status(200).send({success:true,categories:categories})
+        const modifiedCategories = categories.map((category)=>({
+            id:category.id,
+            name:category.name,
+            image:`http://localhost:7000/uploads/${category.image}`
+        }))
+        res.status(200).send({success:true,categories:modifiedCategories})
     } catch (error) {
         res.status(500).send({error:error})
     }
@@ -28,6 +39,11 @@ getCategoryByID = async (req,res) => {
         const category = await Category.findByPk(id); 
         if (!category) {
             return res.status(404).send({ success: false, message: 'Category not found' });
+        }
+         modifiedCategory = {
+            id:category.id,
+            name:category.name,
+            image:`http://localhost:3000/uploads/${category.image}`
         }
         res.status(200).send({success:true, category})
     } catch (error) {
