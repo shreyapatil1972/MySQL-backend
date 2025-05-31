@@ -35,6 +35,11 @@ const Product = sequelize.define('Product', {
     Instock: {
         type: DataTypes.BOOLEAN,
         defaultValue: true
+    },
+    image:{
+        type:DataTypes.STRING(30),
+        allowNull:false,
+        unique:true
     }
 }, {
     tableName: 'Product',
@@ -42,12 +47,12 @@ const Product = sequelize.define('Product', {
 });
 
 Product.belongsTo(Brand,{
-    foreignKey:'id',
+    foreignKey:'Brand_id',
     as:'Brands'
 })
 
 Product.belongsTo(Category,{
-    foreignKey:'id',
+    foreignKey:'Category_id',
     as:'Categories'
 })
 
