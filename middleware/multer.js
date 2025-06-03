@@ -6,7 +6,7 @@ const storage = multer.diskStorage({
         cb(null, 'uploads/')
     },
     filename: (req, file, cb)=>{
-        cb(null, `brand ${Date.now() + path.extname(file.originalname)}`  
+        cb(null, `brand_${Date.now() + path.extname(file.originalname)}`  
         )
     }
 })
@@ -16,7 +16,7 @@ const fileFilter = (req, file, cb) =>{
     if(allowedTypes.includes(file.mimetype)){
         cb(null, true)
     }else{
-        cb(new Error('Invalid file type ', false))
+        cb(new Error('Invalid file type '), false)
     }
 }
 

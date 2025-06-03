@@ -1,22 +1,66 @@
 const { Product } = require('../models/productModel');
+const path = require('path')
+const fs = require('fs')
 
+const handleFileUpload = (file) => {
+    if (!file) return null;
+    return file.filename;
+};
 // Create product
 const createproduct = async (req, res) => {
-    const { name, description, price, category_id, brand_id, quantity } = req.body;
-    const image = req.file ? req.file.filename : null;
-
     try {
         if (!req.user.isAdmin) {
-            return res.status(401).send({ message: 'Not Authorized', success: false });
+            return res.status(403).json({
+                success: false,
+                message: 'Unauthorized access'
+            });
         }
 
-        const newProd = await Product.create({ name, description, price, category_id, brand_id, quantity, image });
+        const { name, description, price, Category_id, Brand_id, Quantity } = req.body;
+        const image = handleFileUpload(req.file);
 
-        return res.status(201).send({ message: "Product added successfully", product: newProd, success: true });
+        if (!name || !description || !price || !Category_id || !Brand_id || !Quantity || !image) {
+            // Clean up uploaded file if validation fails
+            if (req.file) {
+                fs.unlinkSync(path.join(__dirname, '../uploads', req.file.filename));
+            }
+            return res.status(400).json({
+                success: false,
+                message: 'All fields are required'
+            });
+        }
+
+        const product = await Product.create({
+            name,
+            description,
+            price: parseFloat(price),
+            Category_id: parseInt(Category_id),
+            Brand_id: parseInt(Brand_id),
+            Quantity: parseInt(Quantity),
+            inStock: req.body.inStock || true,
+            image
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: 'Product created successfully',
+            product
+        });
+
     } catch (error) {
-        return res.status(500).send({ error: error.message });
+        // Clean up file if error occurs
+        if (req.file) {
+            fs.unlinkSync(path.join(__dirname, '../uploads', req.file.filename));
+        }
+        console.error('Error creating product:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: error.message
+        });
     }
 };
+
 
 // Get all products
 const getAllproducts = async (req, res) => {
@@ -27,10 +71,10 @@ const getAllproducts = async (req, res) => {
             name: product.name,
             description: product.description,
             price: product.price,
-            category_id: product.category_id,   
-            brand_id: product.brand_id,
-            quantity: product.quantity,
-            image: product.image ? `http://localhost:3000/uploads/${product.image}` : null,
+            Category_id: product.Category_id,   
+            Brand_id: product.Brand_id,
+            Quantity: product.Quantity,
+            image: product.image ? `http://localhost:7000/uploads/${product.image}` : null,
         }));
         res.status(200).send({ products:modifiedProducts, success: true });
     } catch (error) {
@@ -52,10 +96,10 @@ const getproductByID = async (req, res) => {
             name: product.name,
             description: product.description,
             price: product.price,
-            category_id: product.category_id,
-            brand_id: product.brand_id,
-            quantity: product.quantity,
-            inStock: product.inStock,
+            Category_id: product.Category_id,
+            Brand_id: product.Brand_id,
+            Quantity: product.Quantity,
+            Instock: product.Instock,
             image: product.image ? `http://localhost:7000/uploads/${product.image}` : null
         };
 
@@ -96,7 +140,12 @@ const deleteproduct = async (req, res) => {
         const deleted = await Product.destroy({ where: { id: req.params.id } });
         if (!deleted) {
             return res.status(404).send({ message: 'Product not found', success: false });
-        }
+        }if (product.image) {
+              const imagePath = path.join(__dirname, '../uploads', product.image);
+              fs.unlink(imagePath, (err) => {
+                if (err) console.error('Failed to delete image:', err);
+              });
+            }
         res.status(200).send({ message: 'Product deleted successfully', success: true });
     } catch (error) {
         res.status(500).send({ error: error.message });

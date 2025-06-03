@@ -8,7 +8,7 @@ const router = express.Router();
 router.post('/create',auth,multerMiddleware.single('image'),categoryController.createCategory);
 router.get('/getAllCategories', categoryController.getAllCategories);
 router.get('/getCategoryByID/:id', categoryController.getCategoryByID);
-router.put('/updateCategory/:id',auth, categoryController.updateCategory);
+router.put('/updateCategory/:id',auth,multerMiddleware.single('image'), categoryController.updateCategory);
 router.delete('/deleteCategory/:id',auth, categoryController.deleteCategory);
 
 module.exports = router

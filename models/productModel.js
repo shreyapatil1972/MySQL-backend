@@ -11,30 +11,44 @@ const Product = sequelize.define('Product', {
     },
     name: {
         type: DataTypes.STRING(100),
-        allowNull: false
+        allowNull: false,
+        validate: {
+            notEmpty: true
+        }
     },
     description: {
-        type: DataTypes.STRING
+        type: DataTypes.TEXT,
+        allowNull: false
     },
     price: {
-        type: DataTypes.INTEGER,
-        allowNull: false
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        validate: {
+            min: 0
+        }
     },
     Category_id: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        field: 'Category_id'
     },
     Brand_id: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        field: 'Brand_id'
     },
     Quantity: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        field: 'Quantity',
+        validate: {
+            min: 0
+        }
     },
     Instock: {
         type: DataTypes.BOOLEAN,
-        defaultValue: true
+        defaultValue: true,
+        field: 'Instock'
     },
     image:{
         type:DataTypes.STRING(30),
