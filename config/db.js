@@ -20,7 +20,7 @@ const connectDB = async () => {
         await sequelize.authenticate();
         console.log('Database connected successfully');
 
-        await sequelize.sync({ alter: false }); // alter:false = safer in prod ******Important******
+        await sequelize.sync({ alter: true }); // alter:false = safer in prod ******Important******
     } catch (error) {
         console.error('Unable to connect to the database:', error);
         process.exit(1);

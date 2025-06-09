@@ -57,7 +57,7 @@ const Product = sequelize.define('Product', {
     }
 }, {
     tableName: 'Product',
-    timestamps: false // Sequelize will auto-create createdAt and updatedAt
+    timestamps: true // Sequelize will auto-create createdAt and updatedAt
 });
 
 Product.belongsTo(Brand,{
