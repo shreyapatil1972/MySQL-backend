@@ -17,8 +17,6 @@ const registerUser = async (req, res) => {
     res.status(500).send({ message: "Registration failed", error });
   }
 };
-
-
 const LoginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -39,12 +37,18 @@ const LoginUser = async (req, res) => {
       isAdmin: loggedInUser.isAdmin,
     };
 
-    const token = jwt.sign(userPayload, process.env.SECREATE_KEY, { expiresIn: '2h' });
+    const token = jwt.sign(userPayload, process.env.SECRET_KEY, { expiresIn: '2h' });
 
     res.status(200).send({
       message: "User logged in successfully",
       success: true,
       token,
+      user: {
+        id: loggedInUser.id,
+        username: loggedInUser.name, // Make sure this matches your User model
+        email: loggedInUser.email,
+        isAdmin: loggedInUser.isAdmin,
+      }
     });
   } catch (error) {
     res.status(500).send({ message: "Login failed", error });
